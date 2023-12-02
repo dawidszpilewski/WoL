@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template_string
 import socket
 import json
+import os
 
 app = Flask(__name__)
 
@@ -47,6 +48,7 @@ HTML_TEMPLATE = """
 </html>
 """
 
+
 def send_wol_packet(mac_address):
     mac_bytes = bytes.fromhex(mac_address.replace(':', ''))
     magic_packet = b'\xff' * 6 + mac_bytes * 16
@@ -54,6 +56,7 @@ def send_wol_packet(mac_address):
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         sock.sendto(magic_packet, ('<broadcast>', 9))
     return True
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -77,5 +80,7 @@ def index():
 
     return render_template_string(HTML_TEMPLATE, message=message, color=color)
 
+
 if __name__ == '__main__':
+    port = int(os.getenv("PORT", 5000))
     app.run(debug=True)
